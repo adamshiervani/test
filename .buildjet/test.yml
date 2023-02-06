@@ -1,0 +1,28 @@
+triggers: [ push ]
+name: Typical NPM
+images:
+  npm-build:
+    base_image: ubuntu-22.04-generic
+    #these tasks will only run once, when the image is built.
+    tasks:
+      - sudo apt-get update && sudo apt-get install -y nodejs
+      - npm ci
+    rebuild:
+      #if ubuntu-22.04-generic is updated, image will be rebuilt
+      on_base_image_change: true
+      #if any of these files change, image will be rebuilt
+      on_file_change:
+        - '**/package*.json'
+executor:
+  image: npm-build
+  hardware: x86-2vcpu
+tasks:
+  - parallel:
+      - command: |
+          echo "test 1"
+          echo ""
+          echo "test 2"
+        report_as: test 1
+      - group:
+          - command: sudo apt-get update
+          - command: sudo apt-get install -y nodejs
